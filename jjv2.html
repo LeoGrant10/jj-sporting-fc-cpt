@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JJ Sporting FC CPT - Complete Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap');
+        
+        body { font-family: 'Montserrat', sans-serif; }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1d4ed8 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .team-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f3f4f6 100%);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        }
+        
+        .admin-panel {
+            display: none;
+        }
+        .admin-panel.active {
+            display: block;
+        }
+        
+        .player-profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 50;
+            overflow-y: auto;
+        }
+        .player-profile-modal.active {
+            display: flex;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .invoice-generator {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .slide-in { animation: slideIn 0.5s ease-out; }
+        
+        .npo-badge {
+            background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+        }
+
+        /* WhatsApp Styles */
+        .whatsapp-green { background: #25D366; }
+        .whatsapp-dark { background: #128C7E; }
+        
+        .chat-bubble {
+            position: relative;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .chat-bubble.sent {
+            background: #DCF8C6;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-bubble.received {
+            background: white;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Match Report Styles */
+        .match-report {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+        }
+        
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background: #25D366;
+            border: 3px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: -8px;
+            top: 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 0;
+            top: 16px;
+            bottom: -24px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .live-ticker {
+            background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Modal Transitions */
+        .modal-enter {
+            animation: modalSlide 0.3s ease-out;
+        }
+        
+        @keyframes modalSlide {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('home')">
+                    <div class="w-12 h-12 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold text-xl">JJ</div>
+                    <div>
+                        <h1 class="text-2xl font-black text-blue-900 tracking-tight">JJ SPORTING FC</h1>
+                        <p class="text-xs text-blue-600 font-semibold">CAPE TOWN</p>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <button onclick="showSection('home')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Home</button>
+                    <button onclick="showSection('teams')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Teams</button>
+                    <button onclick="showSection('fixtures')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Fixtures</button>
+                    <button onclick="showSection('store')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Store</button>
+                    <button onclick="showSection('blog')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Blog</button>
+                    <button onclick="showSection('about')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">About</button>
+                    <button onclick="showSection('contact')" class="nav-link text-gray-700 hover:text-blue-600 font-semibold transition">Contact</button>
+                    <button onclick="showSection('whatsapp')" class="whatsapp-green text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition flex items-center">
+                        <i class="fab fa-whatsapp mr-2"></i>Updates
+                    </button>
+                    <button onclick="showSection('admin')" class="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button onclick="showSection('store')" class="relative text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                    <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="px-4 py-2 space-y-2">
+                <button onclick="showSection('home')" class="block w-full text-left py-2 text-gray-700">Home</button>
+                <button onclick="showSection('teams')" class="block w-full text-left py-2 text-gray-700">Teams</button>
+                <button onclick="showSection('fixtures')" class="block w-full text-left py-2 text-gray-700">Fixtures</button>
+                <button onclick="showSection('store')" class="block w-full text-left py-2 text-gray-700">Store</button>
+                <button onclick="showSection('blog')" class="block w-full text-left py-2 text-gray-700">Blog</button>
+                <button onclick="showSection('whatsapp')" class="block w-full text-left py-2 text-green-600 font-bold">WhatsApp Updates</button>
+                <button onclick="showSection('admin')" class="block w-full text-left py-2 text-blue-900 font-bold">Admin Panel</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME SECTION -->
+    <section id="home" class="section active">
+        <!-- Hero -->
+        <div class="hero-gradient text-white py-20 md:py-32 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 relative z-10">
+                <div class="md:flex items-center justify-between">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <div class="npo-badge inline-block px-4 py-1 rounded-full text-sm font-bold mb-4">
+                            <i class="fas fa-heart mr-2"></i>Registered Non-Profit Organization
+                        </div>
+                        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
+                            DEVELOPING<br>
+                            <span class="text-yellow-400">FUTURE STARS</span>
+                        </h1>
+                        <p class="text-xl md:text-2xl mb-8 text-blue-100">
+                            Cape Town's premier youth football academy nurturing talent from Under 8 to Senior level.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="showSection('teams')" class="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-yellow-300 transition transform hover:scale-105">
+                                View Our Teams
+                            </button>
+                            <button onclick="showSection('store')" class="bg-white text-blue-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+                                Club Store
+                            </button>
+                            <button onclick="showSection('whatsapp')" class="whatsapp-green text-white px-8 py-4 rounded-lg font-bold text-lg hover:opacity-90 transition flex items-center">
+                                <i class="fab fa-whatsapp mr-2"></i>Get Updates
+                            </button>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 flex justify-center">
+                        <div class="relative">
+                            <div class="w-80 h-80 md:w-96 md:h-96 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/20">
+                                <i class="fas fa-futbol text-9xl text-white/80"></i>
+                            </div>
+                            <div class="absolute -bottom-4 -right-4 bg-yellow-400 text-blue-900 p-4 rounded-lg font-bold shadow-xl">
+                                Est. 2010
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Match Ticker (Hidden by default) -->
+        <div class="live-ticker py-3 px-4 text-center font-bold text-sm hidden" id="live-ticker">
+            <span class="mr-4">🔴 LIVE</span>
+            <span id="live-score">JJ Sporting U14 2 - 1 Ajax CT U14</span>
+            <span class="ml-4" id="live-time">67'</span>
+        </div>
+
+        <!-- Stats Counter -->
+        <div class="bg-white py-12 shadow-md">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-black text-blue-900 mb-2" id="stat-players">250+</div>
+                        <div class="text-gray-600 font-semibold">Registered Players</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-blue-900 mb-2">8</div>
+                        <div class="text-gray-600 font-semibold">Age Groups</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-blue-900 mb-2">15+</div>
+                        <div class="text-gray-600 font-semibold">Trophies Won</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-blue-900 mb-2">50+</div>
+                        <div class="text-gray-600 font-semibold">Volunteer Staff</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Age Groups Preview -->
+        <div class="py-20 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4">
+                <h2 class="text-4xl font-black text-center text-blue-900 mb-4">OUR TEAMS</h2>
+                <p class="text-center text-gray-600 mb-12 text-lg">From grassroots to greatness</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div onclick="showTeam('u8')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">Youth</span>
+                            <i class="fas fa-child text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 8</h3>
+                        <p class="text-gray-600 text-sm mb-4">Foundation phase development</p>
+                        <div class="flex items-center text-blue-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('u10')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">Youth</span>
+                            <i class="fas fa-child text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 10</h3>
+                        <p class="text-gray-600 text-sm mb-4">Technical skills focus</p>
+                        <div class="flex items-center text-green-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('u12')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">Junior</span>
+                            <i class="fas fa-running text-yellow-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 12</h3>
+                        <p class="text-gray-600 text-sm mb-4">Tactical awareness</p>
+                        <div class="flex items-center text-yellow-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('u14')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-bold">Junior</span>
+                            <i class="fas fa-running text-orange-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 14</h3>
+                        <p class="text-gray-600 text-sm mb-4">Competitive league play</p>
+                        <div class="flex items-center text-orange-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('u16')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-bold">Youth</span>
+                            <i class="fas fa-futbol text-red-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 16</h3>
+                        <p class="text-gray-600 text-sm mb-4">High performance</p>
+                        <div class="flex items-center text-red-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('u18')" class="team-card p-6 rounded-xl cursor-pointer card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">Academy</span>
+                            <i class="fas fa-futbol text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Under 18</h3>
+                        <p class="text-gray-600 text-sm mb-4">Pre-senior development</p>
+                        <div class="flex items-center text-purple-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('first')" class="team-card p-6 rounded-xl cursor-pointer card-hover border-2 border-blue-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-bold">Senior</span>
+                            <i class="fas fa-trophy text-yellow-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-blue-900 mb-2">1st Team</h3>
+                        <p class="text-gray-600 text-sm mb-4">Premier division</p>
+                        <div class="flex items-center text-blue-900 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <div onclick="showTeam('ladies')" class="team-card p-6 rounded-xl cursor-pointer card-hover border-2 border-pink-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-bold">Ladies</span>
+                            <i class="fas fa-female text-pink-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-pink-700 mb-2">Ladies 1st</h3>
+                        <p class="text-gray-600 text-sm mb-4">Women's premier league</p>
+                        <div class="flex items-center text-pink-600 font-semibold">
+                            View Squad <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Fixtures Preview -->
+        <div class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-end mb-12">
+                    <div>
+                        <h2 class="text-4xl font-black text-blue-900 mb-2">UPCOMING FIXTURES</h2>
+                        <p class="text-gray-600">Next matches across all teams</p>
+                    </div>
+                    <button onclick="showSection('fixtures')" class="text-blue-600 font-bold hover:text-blue-800">
+                        View All <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                
+                <div id="home-fixtures" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest News -->
+        <div class="py-20 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-end mb-12">
+                    <div>
+                        <h2 class="text-4xl font-black text-blue-900 mb-2">LATEST NEWS</h2>
+                        <p class="text-gray-600">Stay updated with club activities</p>
+                    </div>
+                    <button onclick="showSection('blog')" class="text-blue-600 font-bold hover:text-blue-800">
+                        View All Posts <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8" id="latest-posts">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sponsors -->
+        <div class="bg-gray-900 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold mb-8">OUR SPONSORS</h2>
+                <div class="flex flex-wrap justify-center gap-8 opacity-70">
+                    <div class="bg-white/10 px-8 py-4 rounded-lg">Nike</div>
+                    <div class="bg-white/10 px-8 py-4 rounded-lg">Coca-Cola</div>
+                    <div class="bg-white/10 px-8 py-4 rounded-lg">Sportsmans Warehouse</div>
+                    <div class="bg-white/10 px-8 py-4 rounded-lg">Cape Union Mart</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAMS SECTION -->
+    <section id="teams" class="section hidden">
+        <div class="bg-blue-900 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-5xl font-black mb-4">TEAM PROFILES</h1>
+                <p class="text-xl text-blue-200">Select a team to view player statistics and profiles</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <!-- Team Selector -->
+            <div class="flex flex-wrap gap-4 mb-12 justify-center">
+                <button onclick="showTeam('u8')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u8">Under 8</button>
+                <button onclick="showTeam('u10')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u10">Under 10</button>
+                <button onclick="showTeam('u12')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u12">Under 12</button>
+                <button onclick="showTeam('u14')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u14">Under 14</button>
+                <button onclick="showTeam('u16')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u16">Under 16</button>
+                <button onclick="showTeam('u18')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="u18">Under 18</button>
+                <button onclick="showTeam('first')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="first">1st Team</button>
+                <button onclick="showTeam('ladies')" class="team-btn px-6 py-3 rounded-lg font-bold bg-gray-200 hover:bg-blue-600 hover:text-white transition" data-team="ladies">Ladies 1st</button>
+            </div>
+
+            <!-- Team Stats Dashboard -->
+            <div id="team-dashboard" class="mb-12">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <h2 id="team-name" class="text-4xl font-black text-blue-900 mb-2">Select a Team</h2>
+                            <p id="team-coach" class="text-gray-600 text-lg">Coach: <span class="font-semibold">-</span></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-black text-blue-600" id="team-position">-</div>
+                            <div class="text-gray-500">League Position</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-4 gap-6 mb-8">
+                        <div class="stat-card text-white p-6 rounded-xl text-center">
+                            <div class="text-3xl font-bold mb-1" id="stat-played">0</div>
+                            <div class="text-sm opacity-80">Played</div>
+                        </div>
+                        <div class="bg-green-500 text-white p-6 rounded-xl text-center">
+                            <div class="text-3xl font-bold mb-1" id="stat-won">0</div>
+                            <div class="text-sm opacity-80">Won</div>
+                        </div>
+                        <div class="bg-yellow-500 text-white p-6 rounded-xl text-center">
+                            <div class="text-3xl font-bold mb-1" id="stat-drawn">0</div>
+                            <div class="text-sm opacity-80">Drawn</div>
+                        </div>
+                        <div class="bg-red-500 text-white p-6 rounded-xl text-center">
+                            <div class="text-3xl font-bold mb-1" id="stat-lost">0</div>
+                            <div class="text-sm opacity-80">Lost</div>
+                        </div>
+                    </div>
+
+                    <!-- Player Roster -->
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">SQUAD LIST</h3>
+                    <div id="player-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FIXTURES SECTION (NEW) -->
+    <section id="fixtures" class="section hidden">
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-5xl font-black mb-4">FIXTURES & RESULTS</h1>
+                <p class="text-xl text-blue-200">Season schedule, live scores, and match reports</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <!-- League Table -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-12">
+                <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h2 class="font-bold text-lg">League Table - U14 Division</h2>
+                    <button onclick="exportTable()" class="text-blue-600 hover:underline text-sm font-semibold">
+                        <i class="fas fa-download mr-1"></i>Export
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600">Pos</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600">Team</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">P</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">W</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">D</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">L</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">GF</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">GA</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">GD</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600 text-center">Pts</th>
+                                <th class="px-4 py-3 text-sm font-bold text-gray-600">Form</th>
+                            </tr>
+                        </thead>
+                        <tbody id="league-table-body">
+                            <!-- Auto-calculated from fixtures -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Fixtures Grid -->
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Upcoming -->
+                <div>
+                    <h3 class="font-bold text-2xl mb-6 flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></span>
+                        Upcoming Fixtures
+                    </h3>
+                    <div id="fixtures-upcoming" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <!-- Recent Results -->
+                <div>
+                    <h3 class="font-bold text-2xl mb-6">Recent Results</h3>
+                    <div id="fixtures-results" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STORE SECTION -->
+    <section id="store" class="section hidden">
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-5xl font-black mb-4">CLUB STORE</h1>
+                <p class="text-xl text-blue-200">Official JJ Sporting FC merchandise</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Products -->
+                <div class="md:w-3/4">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800">All Products</h2>
+                        <select class="border rounded-lg px-4 py-2" onchange="filterProducts(this.value)">
+                            <option value="all">All Categories</option>
+                            <option value="kit">Playing Kit</option>
+                            <option value="training">Training Gear</option>
+                            <option value="accessories">Accessories</option>
+                            <option value="membership">Memberships</option>
+                        </select>
+                    </div>
+                    
+                    <div id="product-grid" class="grid md:grid-cols-3 gap-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Cart Sidebar -->
+                <div class="md:w-1/4">
+                    <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-shopping-cart mr-2"></i> Your Cart
+                        </h3>
+                        <div id="cart-items" class="space-y-4 mb-4 max-h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center py-4">Cart is empty</p>
+                        </div>
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal</span>
+                                <span id="cart-subtotal" class="font-bold">R0.00</span>
+                            </div>
+                            <button onclick="checkout()" class="w-full bg-blue-900 text-white py-3 rounded-lg font-bold hover:bg-blue-800 transition">
+                                Checkout with Stripe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BLOG SECTION -->
+    <section id="blog" class="section hidden">
+        <div class="bg-gray-900 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-5xl font-black mb-4">CLUB BLOG</h1>
+                <p class="text-xl text-gray-400">News, match reports, and club updates</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div id="blog-posts" class="space-y-8">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-xl font-bold mb-4">Categories</h3>
+                        <ul class="space-y-2">
+                            <li><button class="text-blue-600 hover:underline">Match Reports</button></li>
+                            <li><button class="text-blue-600 hover:underline">Player Profiles</button></li>
+                            <li><button class="text-blue-600 hover:underline">Club News</button></li>
+                            <li><button class="text-blue-600 hover:underline">Community</button></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4 text-blue-900">Subscribe</h3>
+                        <p class="text-gray-600 mb-4">Get the latest news delivered to your inbox.</p>
+                        <input type="email" placeholder="Your email" class="w-full px-4 py-2 rounded-lg border mb-3">
+                        <button class="w-full bg-blue-900 text-white py-2 rounded-lg font-bold">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="section hidden">
+        <div class="bg-blue-900 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-5xl font-black mb-4">ABOUT US</h1>
+                <p class="text-xl text-blue-200">Non-Profit Organization | Registration: NPC-2010/123456/08</p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-16">
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h2 class="text-3xl font-bold text-blue-900 mb-6">Our Mission</h2>
+                    <p class="text-gray-700 text-lg leading-relaxed mb-6">
+                        JJ Sporting FC is a registered non-profit organization dedicated to developing young football talent in Cape Town's underserved communities. Founded in 2010, we provide structured coaching, educational support, and life skills development to over 250 players across 8 age groups.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Youth Development</h4>
+                                <p class="text-gray-600">Professional coaching from qualified SAFA instructors</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Education First</h4>
+                                <p class="text-gray-600">Mandatory study sessions and tutoring support</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Community Impact</h4>
+                                <p class="text-gray-600">Feeding schemes and social outreach programs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-200 rounded-2xl h-96 flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-image text-6xl mb-4"></i>
+                        <p>Club Facilities Photo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NPO Transparency -->
+            <div class="bg-gray-50 rounded-2xl p-8 mb-16">
+                <h2 class="text-3xl font-bold text-blue-900 mb-8 text-center">Financial Transparency</h2>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-black text-blue-600 mb-2">R2.4M</div>
+                        <div class="text-gray-600">Annual Budget</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-green-600 mb-2">85%</div>
+                        <div class="text-gray-600">Program Allocation</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-purple-600 mb-2">R150</div>
+                        <div class="text-gray-600">Monthly Subs (U8-U12)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Committee -->
+            <h2 class="text-3xl font-bold text-blue-900 mb-8 text-center">Management Committee</h2>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <h4 class="font-bold text-lg">John Jacobs</h4>
+                    <p class="text-blue-600">Chairman</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <h4 class="font-bold text-lg">Sarah Peters</h4>
+                    <p class="text-blue-600">Treasurer</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <h4 class="font-bold text-lg">Mark Williams</h4>
+                    <p class="text-blue-600">Technical Director</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <h4 class="font-bold text-lg">Lisa Brown</h4>
+                    <p class="text-blue-600">Club Secretary</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="section hidden">
+        <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-5xl font-black mb-4">CONTACT US</h1>
+                <p class="text-xl text-blue-200">Get in touch with the club</
